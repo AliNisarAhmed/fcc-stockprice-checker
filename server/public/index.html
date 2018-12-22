@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>FCC StockPrice Checker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" media="screen" href="./main.css" />
+</head>
+<body>
+    <div class="container">
+        <h1>FCC Stock Price Checker</h1>
+        <h3>Example usage:</h3>
+        <code>/api/stock-prices?stock=goog</code><br>
+        <code>/api/stock-prices?stock=goog&amp;like=true</code><br>
+        <code>/api/stock-prices?stock=goog&amp;stock=msft</code><br>
+        <code>/api/stock-prices?stock=goog&amp;stock=msft&amp;like=true</code><br>
+        <h3>Example return:</h3>
+        <code>{"stockData":{"stock":"GOOG","price":"786.90","likes":1}}</code><br>
+        <code>{"stockData":[{"stock":"MSFT","price":"62.30","rel_likes":-1},{"stock":"GOOG","price":"786.90","rel_likes":1}]}</code>
+        <hr>
+        <div id="display-container">
+            <div id="display"></div>
+        </div>
+        <div id="forms">
+            <form id="singleStock">
+                <h3>Get Stock price and likes for one stock</h3>
+                <input id="singleStockTicker" type="text" name="singleStock" placeholder="Enter a ticker, e.g. goog" required />
+                <label for="">
+                    <input id="singleStockLike" type="checkbox" name="singleStock-like">Like? 
+                </label>
+                <input type="submit" value="Submit">
+            </form>
+            <form id="twoStock">
+                <h3>Compare prices and get relative likes</h3>
+                <input id="twoStock1" type="text" name="twoStock1" placeholder="Enter a ticker e.g. goog" required />
+                <input id="twoStock2" type="text" name="twoStock2" placeholder="Second ticker" required />
+                <label>
+                    <input type="checkbox" value="false"> Like both? 
+                </label>
+                <input id="twoStockLike" type="submit" value="Submit" />
+            </form>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>

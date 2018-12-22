@@ -19,6 +19,13 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 app.use('/api/stock-prices', stockRoutes);
 
+app.use(express.static(process.cwd() + '/server/public'));
+
+app.get('/', (req, res) => {
+  res.sendFile(process.cwd() + '/server/public/index.html');
+})
+
+module.exports = app;
 
 connect('mongodb://localhost:27017/stockprice-checker')
   .then(() => {

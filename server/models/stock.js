@@ -7,7 +7,7 @@ const stockSchema = new mongoose.Schema({
     unique: true,
   },
   likes: {
-    type: [{type: mongoose.Schema.Types.ObjectId, ref: 'like'}]
+    type: [{type: mongoose.Schema.Types.ObjectId, ref: 'like'}],
   }
 });
 

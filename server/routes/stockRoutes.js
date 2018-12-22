@@ -2,11 +2,11 @@ const router = require('express').Router();
 const Axios = require('axios');
 
 const {
-  createNewStock,
-  createNewLike,
-  findOrCreateNewStock,
-  findLikeByIp,
-  updateStockWithLike
+  findStock,
+  createStock,
+  createLike,
+  updateStockWithLike,
+  findLike
 } = require('../models/queryFunctions');
 
 router.use(async function(req, res, next) {
@@ -33,31 +33,64 @@ router.get('/', async (req, res) => {
 
   if (req.body.stockPrice2) {
     let [ ticker1, ticker2 ] = req.query.stock; 
+    let price1 = req.body.stockPrice1.toFixed(2);
+    let price2 = req.body.stockPrice2.toFixed(2);
     // means the user sent two stocks
     // we must check if either of these stocks already exist in DB,
     // if not we create them first,
-    let stock1 = await findOrCreateNewStock(ticker1);
-    let stock2 = await findOrCreateNewStock(ticker2);
+    let stock1 = await findStock(ticker1);
+    let stock2 = await findStock(ticker2);
+    if (!stock1) {
+      stock1 = createStock(ticker1);
+    }
+    if (!stock2) {
+      stock2 = createStock(ticker2);
+    }
     // then we check if the user has liked them both
     if (req.query.like === 'true') {
-      
+      let like1 = await findLike(req.ip, stock1._id);
+      let like2 = await findLike(req.ip, stock2._id);
+      if (!like1) {
+        like1 = await createLike(req.ip, stock1._id);
+        await updateStockWithLike(stock1._id, like1._id)
+      }
+      if (!like2) {
+        like2 = await createLike(req.ip, stock2._id);
+        await updateStockWithLike(stock2._id, like2._id);
+      }
     }
+
+    res.status(200).json({
+      stockData: [
+        {
+          stock: stock1.stock,
+          price: price1,
+          rel_likes: stock1.likes.length - stock2.likes.length
+        },
+        {
+          stock: stock2.stock,
+          price: price2,
+          rel_likes: stock2.likes.length - stock1.likes.length
+        }
+      ]
+    })
+
       // if yes, we need to update both stocks.
   } else {
-    try {
+    try { 
       let ticker = req.query.stock;
-      let stock = await findOrCreateNewStock(ticker);
-      console.log('stock', stock);
+      let stock; 
+      stock = await findStock(ticker);
+      if (!stock) {
+        stock = await createStock(ticker);
+      }
       
       if (req.query.like === 'true') {
         // find out if this IP has already liked this stock before
-        let foundLike = await findLikeByIp(req.ip);
+        let foundLike = await findLike(req.ip, stock._id);
         if (!foundLike) {
-          // if they have liked it, we ignore their request
-          // else, we increment the likes for this particular stock
-          let newLike = await createNewLike(req.ip);
-          let updatedStock = await updateStockWithLike(stock._id, newLike._id); 
-          console.log('updated Stock');            
+          let newLike = await createLike(req.ip, stock._id);
+          let updatedStock = await updateStockWithLike(stock._id, newLike._id, req.ip); 
           return res.json({
             stock: updatedStock.stock,
             price: req.body.stockPrice1.toFixed(2),
@@ -65,14 +98,16 @@ router.get('/', async (req, res) => {
           });
         }
       }
-      return res.json({
-        stock: stock.stock,
-        price: req.body.stockPrice1.toFixed(2),
-        likes: stock.likes.length
+      return res.status(200).json({
+        stockData: {
+          stock: stock.stock,
+          price: req.body.stockPrice1.toFixed(2),
+          likes: stock.likes.length
+        }
       });
 
     } catch (error) {
-      return res.json({error: error.message});
+      return res.status(500).json({error: error.message});
     }
   }
 })
