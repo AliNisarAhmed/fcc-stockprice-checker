@@ -11,8 +11,8 @@ singleInputForm.addEventListener('submit', function(e) {
   console.log('clicked 1');  
   e.preventDefault();
   let url = `/api/stock-prices?stock=${singleStockTicker.value}${singleStockLike.checked ? '&like=true' : ''}`;
-  console.log(url); 
   singleStockTicker.value = '';
+  singleStockLike.checked = false;
   fetch(url)
     .then(res => res.json())
     .then(data => {
@@ -27,6 +27,9 @@ twoStockForm.addEventListener('submit', function(e) {
   console.log('clicked 2');
   e.preventDefault();
   let url = `/api/stock-prices?stock=${ticker1.value}&stock=${ticker2.value}${twoStockLike.checked ? '&like=true' : ''}`;
+  ticker1.value = '';
+  ticker2.value = '';
+  twoStockLike.checked = false;
   fetch(url)
     .then(res => res.json())
     .then(data => {
@@ -34,5 +37,5 @@ twoStockForm.addEventListener('submit', function(e) {
     })
     .catch(error => {
       display.innerHTML = JSON.stringify(error);
-    })
-})
+    });
+});
