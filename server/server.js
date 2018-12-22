@@ -1,6 +1,6 @@
 const express = require('express');
-const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const helmet = require('helmet');
 
 const connect = require('./connect');
 const stockRoutes = require('./routes/stockRoutes');
@@ -9,13 +9,17 @@ const PORT = process.env.PORT || 3000;
 
 const app = express();
 
-if (app.get('env') === 'development') {
-  app.use(morgan('tiny'));
-  console.log('morgan enabled');
-}
-
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}));
+
+app.use(helmet());
+
+app.use(helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'self'"],
+    styleSrc: ["'self'"]
+  }
+}))
 
 app.use('/api/stock-prices', stockRoutes);
 
@@ -27,9 +31,9 @@ app.get('/', (req, res) => {
 
 module.exports = app;
 
-connect('mongodb://localhost:27017/stockprice-checker')
+connect(process.env.MONGO_URI)
   .then(() => {
-    app.listen(3000, () => {
+    app.listen(PORT, () => {
       console.log(`server started on port: ${PORT}`)
     });
   });
